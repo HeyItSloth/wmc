@@ -1,18 +1,23 @@
 const fs = require('node:fs');
-const path = require('node:path');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord.js');
 const { clientId, token } = require('./config.json');
 const chalk = require('chalk');
 
 const commands = [];
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-for (const file of commandFiles) {
-	const filePath = path.join(commandsPath, file);
-	const command = require(filePath);
-	commands.push(command.data.toJSON());
+if (!fs.existsSync('./commands')) {
+	fs.mkdirSync('./commands');
+}
+const commandDirs = fs.readdirSync('./commands');
+let dir;
+for (dir of commandDirs) {
+	const commandFiles = fs.readdirSync(`./commands/${dir}`).filter(file => file.endsWith('.js'));
+
+	for (const file of commandFiles) {
+		const command = require(`./commands/${dir}/${file}`);
+		commands.push(command.data.toJSON());
+	}
 }
 
 

@@ -59,7 +59,7 @@ module.exports = {
 						{ name: 'DJ', value: 'dj' },
 					))))
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-	async execute(interaction, Store) {
+	async execute(interaction, _, Store) {
 		const mode = interaction.options.getSubcommandGroup();
 		if (mode === 'set') {
 			const type = interaction.options.getSubcommand();
@@ -73,12 +73,12 @@ module.exports = {
 						value: v,
 					});
 					const guildChannel = await interaction.guild.channels.fetch(v);
-					interaction.reply(`Updated restrictions of type "${key}", set to channel: ${guildChannel.name}`);
+					interaction.reply(`Updated restrictions of type "${key}", set to channel: ${guildChannel}`);
 				} catch (e) {
 					if (e.name === 'SequelizeUniqueConstraintError') {
 						const guildChannel = await interaction.guild.channels.fetch(v);
 						const update = await Store.update({ value: v }, { where: { name: key } });
-						return interaction.reply(`Updated module "${key}" to channel \`${guildChannel.name}\``);
+						return interaction.reply(`Updated module "${key}" to channel ${guildChannel}`);
 					}
 					console.error(e);
 					return interaction.reply('Something went wrong...');
@@ -113,7 +113,7 @@ module.exports = {
 
 			if (type === 'channel') {
 				const chan = await interaction.guild.channels.fetch(find.value);
-				return interaction.reply(`The ${type} module is restricted to the \`${chan.name}\` channel.`);
+				return interaction.reply(`The ${type} module is restricted to the ${chan} channel.`);
 			} else if (type === 'role') {
 				const role = await interaction.guild.roles.fetch(find.value);
 				return interaction.reply(`The ${type} module is set to the \`@${role.name}\` role.`);
