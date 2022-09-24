@@ -1,17 +1,22 @@
 // Bulk requires
 
 const fs = require('fs');
-const path = require('node:path');
-const { Client, GatewayIntentBits, Collection, ActivityType } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, ActivityType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { Player } = require('discord-player');
 const { token } = require('./config.json');
 const chalk = require('chalk');
 const Sequelize = require('sequelize');
 
 // Init Client
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates] });
 
-// Init DB
+// Init Music player
+
+const player = new Player(client);
+let paused;
+
+// Init DBs
 
 const sequelize = new Sequelize('database', 'user', 'password', {
 	host: 'localhost',
@@ -27,6 +32,17 @@ const Store = sequelize.define('store', {
 	},
 	value: {
 		type: Sequelize.STRING,
+	},
+});
+
+const Tracks = sequelize.define('tracks', {
+	id: {
+		type: Sequelize.TEXT,
+		unique: true,
+		primaryKey: true,
+	},
+	track: {
+		type: Sequelize.TEXT,
 	},
 });
 
@@ -57,11 +73,14 @@ if (!fs.existsSync('./buttons')) {
 	fs.mkdirSync('./buttons');
 }
 const buttonFiles = fs.readdirSync('./buttons').filter(file => file.endsWith('.js'));
+console.log(chalk.blueBright('>> Beginning init of buttons.'));
 
 for (const file of buttonFiles) {
+	console.log(chalk.yellow(`>>> Initializing ${file}...`));
 	const button = require(`./buttons/${file}`);
 	client.buttons.set(button.data, button);
 }
+console.log(chalk.green(`>> Completed init of buttons, total tasks: ${buttonFiles.length}`));
 
 // Client Ready check
 
@@ -80,9 +99,50 @@ client.once('ready', () => {
 	}
 
 	Store.sync({ force: false });
+	Tracks.sync({ force: false });
 });
 
 // Events
+
+player.on('trackStart', (queue, track) => {
+	const nowplay = new EmbedBuilder()
+		.setTitle(`Now Playing: ${track.title}`)
+		.setURL(track.url)
+		.setDescription(`▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 00:00/${track.duration}`)
+		.setColor('#0000ff')
+		.addFields(
+			{ name: 'Requested By', value: track.requestedBy.tag, inline: true },
+			{ name: 'Artist', value: track.author, inline: true },
+		)
+		.setTimestamp();
+	const row1 = new ActionRowBuilder()
+		.addComponents(
+			new ButtonBuilder()
+				.setCustomId('restart')
+				.setStyle(ButtonStyle.Secondary)
+				.setEmoji('⏮️'),
+			new ButtonBuilder()
+				.setCustomId('pauseplay')
+				.setStyle(ButtonStyle.Secondary)
+				.setEmoji('⏯️'),
+			new ButtonBuilder()
+				.setCustomId('skip')
+				.setStyle(ButtonStyle.Secondary)
+				.setEmoji('⏭️'),
+		);
+	const row2 = new ActionRowBuilder()
+		.addComponents(
+			new ButtonBuilder()
+				.setCustomId('save')
+				.setStyle(ButtonStyle.Secondary)
+				.setEmoji('❤️'),
+			new ButtonBuilder()
+				.setCustomId('stop')
+				.setStyle(ButtonStyle.Secondary)
+				.setEmoji('⏹️'),
+		);
+	queue.metadata.send({ embeds: [nowplay], components: [row1, row2] });
+});
 
 client.on('guildMemberAdd', async member => {
 	const chan = member.guild.systemChannel;
@@ -102,12 +162,16 @@ client.on('interactionCreate', async interaction => {
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) return;
+	let back;
 
 	try {
-		await command.execute(interaction, player, Store);
+		back = await command.execute(client, interaction, player, Store, Tracks);
+		if (back != undefined) {
+			// console.log(back);
+		}
 	} catch (error) {
 		console.error(error);
-		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		// await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 	}
 });
 
@@ -122,9 +186,9 @@ client.on('interactionCreate', async interaction => {
 
 	try {
 		if (interaction.customId == 'pauseplay') {
-			paused = await button.execute(interaction, player, paused);
+			paused = await button.execute(client, interaction, player, paused, Tracks);
 		} else {
-			await button.execute(interaction, player);
+			await button.execute(client, interaction, player, Tracks);
 		}
 	} catch (e) {
 		console.error(e);

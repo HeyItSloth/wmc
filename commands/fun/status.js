@@ -17,7 +17,7 @@ module.exports = {
 					{ name: 'Modded', value: 'mod' },
 				)
 				.setRequired(true))),
-	async execute(interaction) {
+	async execute(_, interaction) {
 		const game = interaction.options.getSubcommand();
 		let server = '';
 		let serverip = '';
