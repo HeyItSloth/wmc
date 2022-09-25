@@ -59,7 +59,7 @@ module.exports = {
 						{ name: 'DJ', value: 'dj' },
 					))))
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-	async execute(interaction, _, Store) {
+	async execute(_, interaction, __, Store) {
 		const mode = interaction.options.getSubcommandGroup();
 		if (mode === 'set') {
 			const type = interaction.options.getSubcommand();

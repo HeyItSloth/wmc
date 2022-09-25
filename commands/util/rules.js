@@ -5,7 +5,7 @@ module.exports = {
 		.setName('rules')
 		.setDescription('Post the rules')
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-	async execute(interaction) {
+	async execute(_, interaction) {
 		const embed = new EmbedBuilder()
 			.setColor(0x7F00FF)
 			.setTitle('Server Rules')
