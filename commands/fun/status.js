@@ -41,20 +41,20 @@ module.exports = {
 					.setURL(`https://mcsrvstat.us/server/${serverip}`)
 					.setDescription('*Server currently offline*')
 					.setFooter({ text: `IP: ${serverip}` });
+			} else {
+				embed.setColor(serverData.color)
+					.setAuthor({ name: 'Online' })
+					.setTitle('Minecraft')
+					.setURL(`https://mcsrvstat.us/server/${serverip}`)
+					.setDescription(`*${motd.clean[0]}*`)
+					.addFields(
+						{ name: 'Online', value: `${players.online} / ${players.max}`, inline: true },
+						{ name: 'Players', value: players.list ? players.list.join(', ') : 'Nobody Online', inline: true },
+						{ name: 'Mods', value: mods.names.length.toString(), inline: true },
+						{ name: 'Version', value: version, inline: true },
+					)
+					.setFooter({ text: `IP: ${serverip}` });
 			}
-
-			embed.setColor(serverData.color)
-				.setAuthor({ name: 'Online' })
-				.setTitle('Minecraft')
-				.setURL(`https://mcsrvstat.us/server/${serverip}`)
-				.setDescription(`*${motd.clean[0]}*`)
-				.addFields(
-					{ name: 'Online', value: `${players.online} / ${players.max}`, inline: true },
-					{ name: 'Players', value: players.list ? players.list.join(', ') : 'Nobody Online', inline: true },
-					{ name: 'Mods', value: mods.names.length.toString(), inline: true },
-					{ name: 'Version', value: version, inline: true },
-				)
-				.setFooter({ text: `IP: ${serverip}` });
 		}
 		interaction.reply({ embeds: [embed] });
 	},
