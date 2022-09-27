@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { request } = require('undici');
-const { getJSONResponse } = require('../../bot.js');
+const { getJSONResponse } = require('../../util/funcs.js');
 const servers = {
 	'mod':		{ ip: '51.38.59.9:25576', color: [0, 204, 0] },
 };

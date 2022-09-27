@@ -6,6 +6,7 @@ const { Player } = require('discord-player');
 const { token } = require('./config.json');
 const chalk = require('chalk');
 const Sequelize = require('sequelize');
+// const { getJSONResponse } = require('./util/funcs.js');
 
 // Init Client
 
@@ -195,22 +196,6 @@ client.on('interactionCreate', async interaction => {
 	}
 });
 
-// Functions
-
-async function getJSONResponse(body) {
-	let fullBody = '';
-
-	for await (const data of body) {
-		fullBody += data.toString();
-	}
-
-	return JSON.parse(fullBody);
-}
-
 // Login
 
 client.login(token);
-
-// Exports
-
-module.exports = { getJSONResponse };
