@@ -5,7 +5,7 @@ const { Client, GatewayIntentBits, Collection, ActivityType, EmbedBuilder, Actio
 const { Player } = require('discord-player');
 const { token } = require('./config.json');
 const chalk = require('chalk');
-const Sequelize = require('sequelize');
+const { Sequelize } = require('sequelize');
 // const { getJSONResponse } = require('./util/funcs.js');
 
 // Init Client
@@ -143,6 +143,10 @@ player.on('trackStart', (queue, track) => {
 				.setEmoji('⏹️'),
 		);
 	queue.metadata.send({ embeds: [nowplay], components: [row1, row2] });
+});
+
+player.on('queueEnd', (queue) => {
+	queue.metadata.send('Queue finished!');
 });
 
 client.on('guildMemberAdd', async member => {

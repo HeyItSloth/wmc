@@ -26,6 +26,11 @@ module.exports = {
 		if (!res) return await interaction.reply({ content: `❌ | Track **${query}** was not found!` });
 
 		const queue = player.createQueue(interaction.guild, {
+			ytdlOptions: {
+				filter: 'audioonly',
+				highWaterMark: 1 << 30,
+				dlChunkSize: 0,
+			},
 			metadata: interaction.channel,
 			leaveOnEnd: false,
 		});
