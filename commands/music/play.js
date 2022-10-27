@@ -33,6 +33,7 @@ module.exports = {
 			},
 			metadata: interaction.channel,
 			leaveOnEnd: false,
+			leaveOnEmpty: true,
 		});
 
 		try {

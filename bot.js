@@ -1,12 +1,12 @@
 // Bulk requires
 
 const fs = require('fs');
-const { Client, GatewayIntentBits, Collection, ActivityType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, ActivityType } = require('discord.js');
 const { Player } = require('discord-player');
 const { token } = require('./config.json');
 const chalk = require('chalk');
 const { Sequelize } = require('sequelize');
-// const { getJSONResponse } = require('./util/funcs.js');
+const { registerEvents } = require('./events');
 
 // Init Client
 
@@ -15,6 +15,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 // Init Music player
 
 const player = new Player(client);
+
 let paused;
 
 // Init DBs
@@ -85,6 +86,8 @@ console.log(chalk.green(`>> Completed init of buttons, total tasks: ${buttonFile
 
 // Client Ready check
 
+registerEvents(client, player, Store);
+
 client.once('ready', () => {
 	const d = new Date();
 	const time = Date.now();
@@ -105,60 +108,6 @@ client.once('ready', () => {
 
 // Events
 
-player.on('trackStart', (queue, track) => {
-	const nowplay = new EmbedBuilder()
-		.setTitle(`Now Playing: ${track.title}`)
-		.setURL(track.url)
-		.setDescription(`▬▬▬▬▬▬▬▬▬▬▬▬▬▬ 00:00/${track.duration}`)
-		.setColor('#0000ff')
-		.addFields(
-			{ name: 'Requested By', value: track.requestedBy.tag, inline: true },
-			{ name: 'Artist', value: track.author, inline: true },
-		)
-		.setTimestamp();
-	const row1 = new ActionRowBuilder()
-		.addComponents(
-			new ButtonBuilder()
-				.setCustomId('restart')
-				.setStyle(ButtonStyle.Secondary)
-				.setEmoji('⏮️'),
-			new ButtonBuilder()
-				.setCustomId('pauseplay')
-				.setStyle(ButtonStyle.Secondary)
-				.setEmoji('⏯️'),
-			new ButtonBuilder()
-				.setCustomId('skip')
-				.setStyle(ButtonStyle.Secondary)
-				.setEmoji('⏭️'),
-		);
-	const row2 = new ActionRowBuilder()
-		.addComponents(
-			new ButtonBuilder()
-				.setCustomId('save')
-				.setStyle(ButtonStyle.Secondary)
-				.setEmoji('❤️'),
-			new ButtonBuilder()
-				.setCustomId('stop')
-				.setStyle(ButtonStyle.Secondary)
-				.setEmoji('⏹️'),
-		);
-	queue.metadata.send({ embeds: [nowplay], components: [row1, row2] });
-});
-
-player.on('queueEnd', (queue) => {
-	queue.metadata.send('Queue finished!');
-});
-
-client.on('guildMemberAdd', async member => {
-	const chan = member.guild.systemChannel;
-	chan.send(`${member} has joined the clan.`);
-	const role = await Store.findOne({ where:{ name: 'default' } });
-	if (role == null) {
-		return;
-	}
-	member.roles.add(await member.guild.roles.fetch(role.value));
-});
-
 // Command handler
 
 client.on('interactionCreate', async interaction => {
@@ -176,7 +125,7 @@ client.on('interactionCreate', async interaction => {
 		}
 	} catch (error) {
 		console.error(error);
-		// await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 	}
 });
 

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, IntegrationApplication } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -17,6 +17,7 @@ module.exports = {
 					.addChoices(
 						{ name: 'Music', value: 'music' },
 						{ name: 'Moderation', value: 'mod' },
+						{ name: 'Logging', value: 'log' },
 					))
 				.addChannelOption(option => option.setName('channel')
 					.setDescription('Which channel you are restricting to')
@@ -47,6 +48,7 @@ module.exports = {
 					.addChoices(
 						{ name: 'Music', value: 'music' },
 						{ name: 'Moderation', value: 'mod' },
+						{ name: 'Logging', value: 'log' },
 					)))
 			.addSubcommand(sc => sc
 				.setName('role')
