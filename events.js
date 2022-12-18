@@ -78,7 +78,7 @@ module.exports.registerEvents = (client, player, Store) => {
 
 	client.on('guildMemberAdd', async member => {
 		const chan = member.guild.systemChannel;
-		chan.send(`Fresh blood! ${member} has joined the Corporation!`);
+		chan.send(`A new person! ${member} has joined the Server!`);
 
 		// Auto-role
 
