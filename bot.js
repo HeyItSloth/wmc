@@ -106,8 +106,6 @@ client.once('ready', () => {
 	Tracks.sync({ force: false });
 });
 
-// Events
-
 // Command handler
 
 client.on('interactionCreate', async interaction => {
